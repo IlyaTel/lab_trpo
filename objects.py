@@ -12,7 +12,6 @@ class Matrix(matrix):
         else:
             return self.A * other
 
-
     @property
     def reverse(self):
     # Обратная матрица
@@ -29,7 +28,7 @@ class Matrix(matrix):
         return det(self.A)
 
     # Поэлементное произведение
-    def mul_by_element(self, matrix):
+    def mul_element_matrix(self, matrix):
         return Matrix(multiply(self.A, matrix.A))       # полементное произведение массивов x1*x2
 
     # Умножение вектора на матрицу

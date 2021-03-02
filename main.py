@@ -1,277 +1,169 @@
-from argparse import ArgumentParser
-from sys import stderr
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, 
+    QDialog, QTableWidgetItem)
+from PyQt5.QtGui import (QIntValidator, 
+    QRegExpValidator)
+from PyQt5.QtCore import QRegExp 
 
-from objects import Matrix, Vector, Scalar
+from graf import (main, error, M_0, result_matrix)
 
-from numpy.linalg import LinAlgError
+from objects import (Matrix, Vector, Scalar)
 
 
-class ModifiedArgParser(ArgumentParser):
-    def exit_with_error(self, error_text):
-        print(error_text, file=stderr)
-        exit(1)
+current_index = 0
 
-    def print_help_and_exit(self):
-        self.print_help()
-        exit(0)
+columns = 0
+lines = 0
+
+result = 0
 
 
 def modification_matrix(input_matrix: str) -> list:
     matrix = []
 
-    for column in input_matrix.split(';'):      # столбец до разделителся ";"
-        elemens_column = []
+    for column in input_matrix.split('], ['):
+        elements_column = []
 
-        for element in column.split(','):       # элемент до разделителя ";" 
+        for element in column.split(','):
             if element:
-                elemens_column.append(float(element))
+                elements_column.append(float(element))
 
-        if len(elemens_column) > 0:
-            matrix.append(elemens_column)
+        if len(elements_column) > 0:
+            matrix.append(elements_column)
 
     return matrix
 
+class Result_matrix(result_matrix.Ui_Dialog, QDialog):
+    # Окно вывода результата выполненной операции с матрицей
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        global columns, lines
+
+        self.tableWidget.setColumnCount(columns)
+        self.tableWidget.setRowCount(lines)
+
+        row = 0     # строка
+        for i in result:
+            col = 0     # столбец
+            print('i = ', i)
+
+            for j in i:
+                print('j = ', j)
+                number = QTableWidgetItem(str(j))
+                print('n = ', number)
+                self.tableWidget.setItem(row, col, number)
+
+                col += 1
+            row += 1
+
+class Error(error.Ui_Dialog, QDialog):
+    # Окно ошибки
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+
+class Mul_M_on_S(M_0.Ui_Dialog, QDialog):
+    # Окно нулевой операции
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        regexp_query = QRegExp('[1-9]*')
+        input_validator = QRegExpValidator(regexp_query)
+        input_validator.setRegExp(regexp_query)
+
+        self.columns.setValidator(input_validator)      # колво столбцов
+        self.lines.setValidator(input_validator)        # колво строк
+        self.scalar.setValidator(input_validator)       # скаляр
+
+        self.pushButton.clicked.connect(self.size_matrix)     # Нажатие на кнопку
+        self.pushButton_2.clicked.connect(self.mul_matrix_on_scalar)
+
+    # Обработка нажатия на кнопку, размерность матрицы
+    def size_matrix(self):
+        global columns, lines
+
+        columns = int(self.columns.text())
+        lines = int(self.lines.text())
+
+        self.tableWidget.setColumnCount(columns)
+        self.tableWidget.setRowCount(lines)
+
+    #  Обработка нажатия на кнопку, операция умножение матрицы на скаляр
+    def mul_matrix_on_scalar(self):    
+        global columns, lines, result
+
+        # получение введенных чисел пользователем
+        data = []
+        for line in range(lines):
+            tmp = []
+            for column in range(columns):
+                try:
+                    tmp.append(self.tableWidget.item(line, column).text())
+                except:
+                    tmp.append('0')
+            data.append(tmp)
+        for i in data: 
+            print(i)
+
+        # преобразование списка в строку и удаление лишних символов
+        matrix_A = str(data).strip('[]').replace("'", "")
+        scalar_b = float(self.scalar.text())
+
+        # .tolist() преобразует матричный тип в список
+        result = (Matrix(modification_matrix(matrix_A)) * Scalar(scalar_b)).tolist()
+
+        result_dialog = Result_matrix()
+        result_dialog.show()
+        result_dialog.exec_()
+
+
+class MainApp(main.Ui_MainWindow, QMainWindow):
+    def __init__(self):
+        super(MainApp, self).__init__()
+        self.setupUi(self)
+
+        # Добавление значений для выбора операций
+        # self.comboBox.addItem('Умножение матрицы на скаляр')
+        # self.comboBox.addItem('Поэлементное сложение')
+        # self.comboBox.addItem('Поэлементное произведение')
+
+        self.comboBox.addItems(['Умножение матрицы на скаляр',
+            'Поэлементное сложение', 'Поэлементное произведение'])
+
+        self.comboBox.highlighted[int].connect(self.save_index)
+
+        self.generate_and_calculate.clicked.connect(self.enter)     # Нажатие на кнопку
+        # self.generate_and_calculate.clicked.connect(self.NAME.close)
+
+    # Сохранение индекса выбранной операции
+    def save_index(self, index):
+        global current_index
+        current_index = index
+        print(current_index)
+
+    # Обработка нажатия на кнопку "Выбрать данную операцию"
+    def enter(self):
+        # print(self.comboBox.currentData())
+        # print(self.comboBox.setCurrentIndex(1)) 
+        global current_index
+
+        if current_index == 0:
+            win = Mul_M_on_S()
+            win.show()
+            win.exec_()
+            
+        else:
+            exit()
+
 
 if __name__ == '__main__':
-    parser = ModifiedArgParser(prog='Lab1_TRPO_Telegin_576')
-    subparsers = parser.add_subparsers(help='BLABLABLA')
-
-    operations_with_matrix = subparsers.add_parser('matrix', 
-        help='Операции с матрицами')
-    operations_with_matrix.add_argument('-ms', '--mul_matrix_on_scalar', 
-        action='store_true', help='Умножение матрицы на скаляр')
-    operations_with_matrix.add_argument('-s', '--sum_martix',
-        action='store_true', help='Поэлементное сложение')
-    operations_with_matrix.add_argument('-m', '--mul_element_matrix',
-        action='store_true', help='Поэлементное произведение')
-    operations_with_matrix.add_argument('-mv', '--mul_matrix_on_vector',
-        action='store_true', help='Умножение вектора на матрицу')
-    operations_with_matrix.add_argument('-mm', '--mul_matrix',
-        action='store_true', help='Матричное произведение')
-    operations_with_matrix.add_argument('-mt', '--trace_matrix',
-        action='store_true', help='Вычисление следа матрицы')
-    operations_with_matrix.add_argument('-md', '--det_matrix',
-        action='store_true', help='Вычисление определителя матрицы')
-    operations_with_matrix.add_argument('-mr', '--reverse_matrix',
-        action='store_true', help='Вычисление обратной матрицы')
-    operations_with_matrix.add_argument('-mtr', '--transp_matrix',
-        action='store_true', help='Транспонирование матрицы')
-
-    operations_with_vector = subparsers.add_parser('vector',
-        help='Операции с векторами')
-    operations_with_vector.add_argument('-vs', '--mul_vector_on_scalar',
-        action='store_true', help='Умножение вектора на скаляр')
-    operations_with_vector.add_argument('-s', '--sum_vector',
-        action='store_true', help='Поэлементное сложение')
-    operations_with_vector.add_argument('-m', '--mul_element_vector',
-        action='store_true', help='Поэлементное умножение')
-    operations_with_vector.add_argument('-mv', '--mul_matrix_on_vector',
-        action='store_true', help='Умножение вектора на матрицу')
-    operations_with_vector.add_argument('-sm', '--mul_scalar',
-        action='store_true', help='Скалярное произведение')
-    operations_with_vector.add_argument('-vm', '--mul_vector',
-        action='store_true', help='Векторное произведение')
-    operations_with_vector.add_argument('-lv', '--len_vector',
-        action='store_true', help='Вычисление длины вектора')
-    operations_with_vector.add_argument('-l', '--line_vector',
-        action='store_true', help='Проверка сонаправленности векторов')
-    operations_with_vector.add_argument('-o', '--ortog_vector',
-        action='store_true', help='Проверка векторов на ортогональность')
-
-    operations_with_scalar = subparsers.add_parser('scalar',
-        help='Операции со скалярами')
-    operations_with_scalar.add_argument('-s', '--sum_scalar',
-        nargs=2, type=float, help='Сумма скаляров')
-    operations_with_scalar.add_argument('-r', '--reverse_scalar',
-        nargs=1, type=float, help='Инверсия скаляра')
-    operations_with_scalar.add_argument('-m', '--mul_scalar',
-        nargs=2, type=float, help='Произведение скаляров')
-    operations_with_scalar.add_argument('-p', '--pow_scalar',
-        nargs=2, type=float, help='Возведение в степень скаляра')
-    operations_with_scalar.add_argument('-sqrt', '--sqrt_scalar',
-        nargs=2, type=float, help='Вычисление корня скаляра')
-    operations_with_scalar.add_argument('-sin', '--sin_scalar',
-        type=float, help='Синус скаляра')
-    operations_with_scalar.add_argument('-cos', '--cos_scalar',
-        type=float, help='Косинус скаляра')
-    operations_with_scalar.add_argument('-tg', '--tg_scalar',
-        type=float, help='Тангенс скаляра')
-    operations_with_scalar.add_argument('-ctg', '--ctg_scalar',
-        type=float, help='Котангенс скаляра')
-
-    args = parser.parse_args()
-
-    #---------------------------------#
-    #                                 #
-    #       Операции с матрицами      #
-    #                                 #
-    #---------------------------------#
-
-    # Умножение матрицы на скаляр
-    if args.mul_matrix_on_scalar:
-    # if getattr(args, 'mul_matrix_on_scalar', False):
-        scalar_b = float(input('Введите скаляр b: '))
-
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-
-        print(Matrix(modification_matrix(matrix_A)) * Scalar(scalar_b))
-
-    # Поэлементное сложение
-    elif args.sum_martix:
-        print('''Введите матрицы в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-        matrix_B = input('Введите матрицу B: ')
-
-        print(Matrix(modification_matrix(matrix_A)) 
-            + Matrix(modification_matrix(matrix_B)))
-    
-    # Поэлементное произведение
-    elif args.mul_element_matrix:
-        print('''Введите матрицы в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-        matrix_B = input('Введите матрицу B: ')
-
-        print(Matrix(modification_matrix(matrix_A))
-            .mul_by_element(Matrix(modification_matrix(matrix_B))))
-
-    # Умножение вектора на матрицу
-    elif args.mul_matrix_on_vector:
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-        vector = input('Введите вектор (элементы через запятую): ')
-
-        print(Matrix(modification_matrix(matrix_A))
-            .mul_on_vector(Vector([float(i) for i in vector.split(',')])))
-
-    # Матричное произведение
-    elif args.mul_matrix:
-        print('''Введите матрицы в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-        matrix_B = input('Введите матрицу B: ')
-
-        try:
-            print(Matrix(modification_matrix(matrix_A)) 
-                * Matrix(modification_matrix(matrix_B)))
-                
-        except ValueError:
-            parser.exit_with_error(
-                '\nЧИСЛО СТОЛБЦОВ матрицы A не совпадает с числом строк матрицы B')
-
-    # Вычисление следа матрицы
-    elif args.trace_matrix:
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-
-        print(Matrix(modification_matrix(matrix_A)).trace)
-
-    # Вычисление определителя матрицы
-    elif args.det_matrix:
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-
-        try:
-            print(Matrix(modification_matrix(matrix_A)).det)
-
-        except LinAlgError:
-            parser.exit_with_error('\nМатрица A должна быть квадратной')
-
-    # Вычисление обратной матрицы
-    elif args.reverse_matrix:
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-
-        try:
-            print(Matrix(modification_matrix(matrix_A)).reverse)
-
-        except LinAlgError:
-            parser.exit_with_error('\nМатрица должна быть квадратной')
-
-    # Транспонирование матрицы
-    elif args.transp_matrix:
-        print('''Введите матрицу A в следующем виде:
-        1, 2, 3; - 1-ая строка
-        4, 5, 6; - 2-ая строка
-        7, 8, 9; - 3-ья строка и так далее
-
-        1  2  3
-        4  5  6
-        7  8  9
-        ''')
-
-        matrix_A = input('Введите матрицу A: ')
-
-        print(Matrix(modification_matrix(matrix_A)).T)
-
+    app = QApplication([])
+    main_app = MainApp()
+    main_app.show()
+    exit(app.exec_())

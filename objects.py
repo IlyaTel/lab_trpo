@@ -48,9 +48,7 @@ class Vector:
         return str(self.__data)
 
     def __mul__(self, other):
-        '''
-        Перегрузка оператора умножения
-        '''
+        # Перегрузка оперетора умножения
 
         if isinstance(other, int) or isinstance(other, float):
             return Vector(self.__data * other)
@@ -63,9 +61,7 @@ class Vector:
                 return Vector(self.__data * other.numpy_repr)
 
     def __add__(self, other):
-        '''
-        Перегрузка оператора сложения
-        '''
+        # Перегрузка оператора сложения
 
         if not isinstance(other, Vector):
             raise TypeError('Второй аргумент не является вектором')
@@ -78,28 +74,23 @@ class Vector:
     @property
     def numpy_repr(self) -> array:
         # Представление вектора в качестве <<NumPy.array>>
+
         return self.__data
 
     @property
     def len(self) -> int:
-        '''
-        Длина в представлении Python
-        '''
+        # Длина в представлении Python
 
         return len(self.__data)
 
     @property
     def vec_len(self) -> float:
-        '''
-        Длина вектора
-        '''
+        # Длина вектора
 
         return norm(self.__data)
 
     def mul_on_matrix(self, matrix):
-        '''
-        Умножение вектора на матрицу
-        '''
+        # Умножение вектора на матрицу
 
         if not isinstance(matrix, Matrix):
             raise TypeError('Второй аргумент не является матрицей')
@@ -114,19 +105,12 @@ class Vector:
                 )
 
     def scalar_mul(self, other) -> int64:
-        '''
-        Скалярное умножение векторов
-        '''
-
-        if not isinstance(other, Vector):
-            raise TypeError('Второй аргумент не является вектором')
-        else:
-            return dot(self.__data, other.numpy_repr)
+        # Скалярное умножение векторов
+        
+        return dot(self.__data, other.numpy_repr)
 
     def vec_mul(self, other):
-        '''
-        Векторное произведение трехмерный векторов
-        '''
+        # Векторное произведение трехмерный векторов
 
         if not isinstance(other, Vector):
             raise TypeError('Второй аргумент не является вектором')
@@ -137,6 +121,7 @@ class Vector:
                 return Vector(cross(self.__data, other.numpy_repr))
 
     def is_collen(self, second_vector) -> bool:
+
         if not isinstance(second_vector, Vector):
             raise TypeError('Второй аргумент не является вектором')
         else:
@@ -156,6 +141,7 @@ class Vector:
             return False
 
     def is_ortog(self, second_vector) -> bool:
+
         if self.scalar_mul(second_vector) == 0:
             return True
 
@@ -186,11 +172,23 @@ class Scalar:
 
     @property
     def reverse(self):
-        '''
-        Обратное
-        '''
+        # Инверсия
 
         return Scalar(-self.__data)
+
+    def pow(self, other):
+        # Возведение в степень
+
+        return Scalar(
+            self.__data ** other
+        )
+
+    def sqrt(self, other):
+        # Извлечение корня
+
+        return Scalar(
+            self.__data ** (1 / other)
+        )
 
     @property
     def sin(self):
@@ -205,7 +203,7 @@ class Scalar:
         )
 
     @property
-    def tan(self):
+    def tg(self):
         return Scalar(
             tan(self.__data)
         )
@@ -214,22 +212,4 @@ class Scalar:
     def ctg(self):
         return Scalar(
             1 / tan(self.__data)
-        )
-
-    def pow(self, other):
-        '''
-        Возведение в степень
-        '''
-
-        return Scalar(
-            self.__data ** other
-        )
-
-    def sqrt(self, other):
-        '''
-        Извлечение корня
-        '''
-
-        return Scalar(
-            self.__data ** (1 / other)
         )

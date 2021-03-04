@@ -5,7 +5,9 @@ from PyQt5.QtGui import (QIntValidator,
     QRegExpValidator)
 from PyQt5.QtCore import QRegExp 
 
-from numpy.linalg import LinAlgError
+import numpy as np
+
+from os import getcwd, mkdir, path
 
 from graf import (select, main, 
     M_0, M_1, M_2, M_3, result_matrix, result_trace,
@@ -76,6 +78,42 @@ def output_result_vector():
     result_dialog.show()
     result_dialog.exec_()
 
+def save_input_A(self):
+    # Получение введенных пользователем значений
+
+    global columns_A, lines_A
+
+    # получение введенных чисел пользователем
+    data_A = []
+    for line in range(lines_A):
+        tmp = []
+        for column in range(columns_A):
+            try:
+                tmp.append(self.tableWidget_A.item(line, column).text())
+            except:
+                tmp.append('0')
+        data_A.append(tmp)
+
+    return data_A
+
+def save_input_B(self):
+    # Получение введенных пользователем значений
+
+    global columns_B, lines_B
+
+    # получение введенных чисел пользователем
+    data_B = []
+    for line in range(lines_B):
+        tmp = []
+        for column in range(columns_B):
+            try:
+                tmp.append(self.tableWidget_B.item(line, column).text())
+            except:
+                tmp.append('0')
+        data_B.append(tmp)
+
+    return data_B
+
 class Result_matrix(result_matrix.Ui_Dialog, QDialog):
     # Окно вывода результата выполненной операции с матрицей
 
@@ -91,17 +129,31 @@ class Result_matrix(result_matrix.Ui_Dialog, QDialog):
         row = 0     # строка
         for i in result:
             col = 0     # столбец
-            print('i = ', i)
 
             for j in i:
-                print('j = ', j)
                 j = round(j, 5)     # округление до 5ти знаков
                 number = QTableWidgetItem(str(j))
-                print('n = ', number)
                 self.tableWidget.setItem(row, col, number)
 
                 col += 1
             row += 1
+
+        self.generate_csv_files()
+
+    @staticmethod   # Создание csv файла
+    def generate_csv_files():
+
+        current_path = getcwd()
+        folder_for_csv_files = path.join(current_path, 'result')
+        if not path.exists(folder_for_csv_files):
+            mkdir(folder_for_csv_files)
+
+        np.savetxt(
+            path.join(folder_for_csv_files, 'result_operations.csv'),
+            result,
+            delimiter=';',
+            fmt='%d'
+        )
 
 class Result_T_matrix(result_matrix.Ui_Dialog, QDialog):
     # Окно вывода результата выполненной операции транспонирования с матрицей
@@ -118,17 +170,31 @@ class Result_T_matrix(result_matrix.Ui_Dialog, QDialog):
         row = 0     # строка
         for i in result:
             col = 0     # столбец
-            print('i = ', i)
 
             for j in i:
-                print('j = ', j)
                 j = round(j, 5)     # округление до 5ти знаков
                 number = QTableWidgetItem(str(j))
-                print('n = ', number)
                 self.tableWidget.setItem(row, col, number)
 
                 col += 1
             row += 1
+
+        self.generate_csv_files()
+
+    @staticmethod   # Создание csv файла
+    def generate_csv_files():
+
+        current_path = getcwd()
+        folder_for_csv_files = path.join(current_path, 'result')
+        if not path.exists(folder_for_csv_files):
+            mkdir(folder_for_csv_files)
+
+        np.savetxt(
+            path.join(folder_for_csv_files, 'result_operations.csv'),
+            result,
+            delimiter=';',
+            fmt='%d'
+        )
 
 class Result_trace(result_trace.Ui_Dialog, QDialog):
     # Окно вывода результата выполненной следа матрицы
@@ -139,7 +205,7 @@ class Result_trace(result_trace.Ui_Dialog, QDialog):
 
         self.tableWidget.setColumnCount(1)
         self.tableWidget.setRowCount(1)
-
+    
         number = QTableWidgetItem(str(result))
         self.tableWidget.setItem(0, 0, number)
 
@@ -162,11 +228,27 @@ class Result_vector(result_matrix.Ui_Dialog, QDialog):
             self.tableWidget.setItem(row, 0, number)
 
             row += 1
+        
+        self.generate_csv_files()
+
+    @staticmethod   # Создание csv файла
+    def generate_csv_files():
+
+        current_path = getcwd()
+        folder_for_csv_files = path.join(current_path, 'result')
+        if not path.exists(folder_for_csv_files):
+            mkdir(folder_for_csv_files)
+
+        np.savetxt(
+            path.join(folder_for_csv_files, 'result_operations.csv'),
+            result,
+            delimiter=';',
+            fmt='%d'
+        )
 
 #----------------------------------------------------------
 # Операции с матрицами
 #
-
 class Mul_M_on_S(M_0.Ui_Dialog, QDialog):
     # Умножение матрицы на скаляр
 
@@ -200,21 +282,10 @@ class Mul_M_on_S(M_0.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def mul_matrix_on_scalar(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
         scalar_b = float(self.scalar.text())
 
         # .tolist() преобразует матричный тип в список
@@ -264,35 +335,11 @@ class Sum_element_M(M_1.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def sum_matrix(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data_A).strip('[]').replace("'", "")
-        matrix_B = str(data_B).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        matrix_B = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = (Matrix(modification_matrix(matrix_A)) 
@@ -342,35 +389,11 @@ class Mul_element_M(M_1.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def mul_element_matrix(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data_A).strip('[]').replace("'", "")
-        matrix_B = str(data_B).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        matrix_B = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = (Matrix(modification_matrix(matrix_A))
@@ -401,49 +424,27 @@ class Mul_M_on_V(M_2.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Заполнить матрицу'
     def size_matrix(self):
-        global columns_A, lines_A
+        global columns_A, lines_A, columns_B, lines_B
 
         columns_A = int(self.columns_A.text())
         lines_A = int(self.lines_A.text())
 
+        columns_B = 1
+        lines_B = lines_A
 
         self.tableWidget_A.setColumnCount(columns_A)
         self.tableWidget_A.setRowCount(lines_A)
 
-        self.tableWidget_B.setColumnCount(1)
-        self.tableWidget_B.setRowCount(lines_A)
+        self.tableWidget_B.setColumnCount(columns_B)
+        self.tableWidget_B.setRowCount(lines_B)
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def mul_matrix_on_vector(self):
-        global columns_A, lines_A, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем вектор
-        data_B = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(1):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data_A).strip('[]').replace("'", "")
-        vector = str(data_B).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        vector = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = (Matrix(modification_matrix(matrix_A))
@@ -493,35 +494,11 @@ class Mul_M(M_1.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def mul_matrix(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data_A).strip('[]').replace("'", "")
-        matrix_B = str(data_B).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        matrix_B = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = (Matrix(modification_matrix(matrix_A))
@@ -562,21 +539,10 @@ class Trace_M(M_3.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def trace_matrix(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = str((Matrix(modification_matrix(matrix_A)).trace).tolist())
@@ -617,21 +583,10 @@ class Det_M(M_3.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def det_matrix(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         try:
@@ -641,7 +596,7 @@ class Det_M(M_3.Ui_Dialog, QDialog):
             # Вывод результата в отдельное окно
             output_result_trace()
 
-        except LinAlgError:
+        except np.linalg.LinAlgError:
             print('Ошибка! Матрица не является квадратной')
 
 class Reverse_M(M_3.Ui_Dialog, QDialog):
@@ -676,21 +631,10 @@ class Reverse_M(M_3.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def reverse_matrix(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
 
         try:
             # .tolist() преобразует матричный тип в список
@@ -699,7 +643,7 @@ class Reverse_M(M_3.Ui_Dialog, QDialog):
             # Вывод результата в отдельное окно
             output_result_matrix()
 
-        except LinAlgError:
+        except np.linalg.LinAlgError:
             print('Ошибка! Матрица не является квадратной')
 
 class Transp_M(M_3.Ui_Dialog, QDialog):
@@ -734,21 +678,10 @@ class Transp_M(M_3.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def transp_matrix(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        matrix_A = str(data).strip('[]').replace("'", "")
+        matrix_A = str(save_input_A(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = (Matrix(modification_matrix(matrix_A)).T).tolist()
@@ -761,10 +694,10 @@ class Transp_M(M_3.Ui_Dialog, QDialog):
 # Операции с матрицами
 #----------------------------------------------------------
 
+
 #----------------------------------------------------------
 # Операции с векторами
 #
-
 class Mul_V_on_S(mul_v_s.Ui_Dialog, QDialog):
     # Умножение вектора на скаляр
 
@@ -792,26 +725,15 @@ class Mul_V_on_S(mul_v_s.Ui_Dialog, QDialog):
         columns_A = 1
         lines_A = int(self.lines_A.text())
 
-        self.tableWidget.setColumnCount(columns_A)
-        self.tableWidget.setRowCount(lines_A)
+        self.tableWidget_A.setColumnCount(columns_A)
+        self.tableWidget_A.setRowCount(lines_A)
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def mul_vector_on_scalar(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        vector = str(data).strip('[]').replace("'", "")
+        vector = str(save_input_A(self)).strip('[]').replace("'", "")
         scalar_b = float(self.scalar.text())
 
         # .tolist() преобразует матричный тип в список
@@ -858,35 +780,11 @@ class Sum_element_V(two_vector.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def sum_element_vector(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        vector_A = str(data_A).strip('[]').replace("'", "")
-        vector_B = str(data_B).strip('[]').replace("'", "")
+        vector_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        vector_B = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = modification_vector(str(Vector(modification_matrix(vector_A))
@@ -932,121 +830,15 @@ class Mul_element_V(two_vector.Ui_Dialog, QDialog):
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def sum_element_vector(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        vector_A = str(data_A).strip('[]').replace("'", "")
-        vector_B = str(data_B).strip('[]').replace("'", "")
+        vector_A = str(save_input_A(self)).strip('[]').replace("'", "")
+        vector_B = str(save_input_B(self)).strip('[]').replace("'", "")
 
         # .tolist() преобразует матричный тип в список
         result = modification_vector(str(Vector(modification_matrix(vector_A))
             * Vector(modification_matrix(vector_B))).strip('[]'))
-
-        # Вывод результата в отдельное окно
-        output_result_vector()
-
-######
-class Mul_V_scalar(two_vector.Ui_Dialog, QDialog):
-    # Окно четвертой операции
-    # Скалярное произведение векторов
-
-    def __init__(self):
-        QDialog.__init__(self)
-        self.setupUi(self)
-
-        regexp_query = QRegExp('[0-9]*')
-        input_validator = QRegExpValidator(regexp_query)
-        input_validator.setRegExp(regexp_query)
-
-        self.lines.setValidator(input_validator)        # колво строк векторов
-
-        # Нажатие на кнопку 'Заполнить вектора'
-        self.pushButton.clicked.connect(self.size_matrix)
-
-        # Нажатие на кнопку 'Выполнить операцию'
-        self.pushButton_2.clicked.connect(self.sum_element_vector)
-
-    # Обработка нажатия на кнопку 'Заполнить матрицу'
-    def size_matrix(self):
-        global columns_A, lines_A, columns_B, lines_B
-
-        columns_A = 1
-        lines_A = int(self.lines.text())
-
-        columns_B = 1
-        lines_B = int(self.lines.text())
-
-        self.tableWidget_A.setColumnCount(columns_A)
-        self.tableWidget_A.setRowCount(lines_A)
-
-        self.tableWidget_B.setColumnCount(columns_B)
-        self.tableWidget_B.setRowCount(lines_B)
-
-    # Обработка нажатия на кнопку 'Выполнить операцию'
-    def sum_element_vector(self):
-        global columns_A, lines_A, columns_B, lines_B, result
-
-        #------------------------------------------------------
-        # получение введенных чисел пользователем матрица A
-        data_A = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget_A.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_A.append(tmp)
-
-        # получение введенных чисел пользователем матрица B
-        data_B = []
-        for line in range(lines_B):
-            tmp = []
-            for column in range(columns_B):
-                try:
-                    tmp.append(self.tableWidget_B.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data_B.append(tmp)
-        # ------------------------------------------------------
-
-        # преобразование списка в строку и удаление лишних символов
-        vector_A = str(data_A).strip('[]').replace("'", "")
-        vector_B = str(data_B).strip('[]').replace("'", "")
-
-        print(vector_A, '\n')
-        print(vector_B, '\n')
-
-        # vector_B = (str((Matrix(modification_matrix(vector_B)).T).tolist())).strip('[]')
-        # vector_B = vector_B.replace('0', '').replace('.,', '], [').replace('.', '')
-        
-
-        result = modification_vector(str(Vector(modification_matrix(vector_A))
-            .scalar_mul(Vector(modification_matrix(vector_B)))).strip('[]'))
 
         # Вывод результата в отдельное окно
         output_result_vector()
@@ -1077,41 +869,29 @@ class V_len(v_len.Ui_Dialog, QDialog):
         columns_A = 1
         lines_A = int(self.lines.text())
 
-        self.tableWidget.setColumnCount(columns_A)
-        self.tableWidget.setRowCount(lines_A)
+        self.tableWidget_A.setColumnCount(columns_A)
+        self.tableWidget_A.setRowCount(lines_A)
 
     # Обработка нажатия на кнопку 'Выполнить операцию'
     def v_len(self):    
-        global columns_A, lines_A, result
-
-        # получение введенных чисел пользователем
-        data = []
-        for line in range(lines_A):
-            tmp = []
-            for column in range(columns_A):
-                try:
-                    tmp.append(self.tableWidget.item(line, column).text())
-                except:
-                    tmp.append('0')
-            data.append(tmp)
+        global result
 
         # преобразование списка в строку и удаление лишних символов
-        vector = str(data).strip('[]').replace("'", "")
+        vector = str(save_input_A(self)).strip('[]').replace("'", "")
 
         result = modification_vector(str(Vector(modification_matrix(vector))
            .vec_len).strip('[]'))
     
         # Вывод результата в отдельное окно
         output_result_vector()
-
 #
 # Операции с векторами
 #----------------------------------------------------------
 
+
 #----------------------------------------------------------
 # Операции со скалярами
 #
-
 class Sum_S(two_scalar.Ui_Dialog, QDialog):
     # Инверсия
 
@@ -1255,15 +1035,121 @@ class Sqrt_S(s_pow.Ui_Dialog, QDialog):
         # Вывод результата в отдельное окно
         output_result_trace()
 
+class Sin_S(one_scalar.Ui_Dialog, QDialog):
+    # Синус
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        regexp_query = QRegExp('[0-9]*')
+        input_validator = QRegExpValidator(regexp_query)
+        input_validator.setRegExp(regexp_query)
+
+        self.scalar.setValidator(input_validator)       # скаляр
+
+        # Нажатие на кнопку 'Выполнить операцию'
+        self.pushButton_2.clicked.connect(self.inv_s)
+
+    # Обработка нажатия на кнопку 'Выполнить операцию'
+    def inv_s(self):    
+        global result
+
+        scalar_a = float(self.scalar.text())
+
+        result = Scalar(scalar_a).sin
+    
+        # Вывод результата в отдельное окно
+        output_result_trace()
+
+class Cos_S(one_scalar.Ui_Dialog, QDialog):
+    # Косинус
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        regexp_query = QRegExp('[0-9]*')
+        input_validator = QRegExpValidator(regexp_query)
+        input_validator.setRegExp(regexp_query)
+
+        self.scalar.setValidator(input_validator)       # скаляр
+
+        # Нажатие на кнопку 'Выполнить операцию'
+        self.pushButton_2.clicked.connect(self.inv_s)
+
+    # Обработка нажатия на кнопку 'Выполнить операцию'
+    def inv_s(self):    
+        global result
+
+        scalar_a = float(self.scalar.text())
+
+        result = Scalar(scalar_a).cos
+    
+        # Вывод результата в отдельное окно
+        output_result_trace()
+
+class Tg_S(one_scalar.Ui_Dialog, QDialog):
+    # Тангенс
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        regexp_query = QRegExp('[0-9]*')
+        input_validator = QRegExpValidator(regexp_query)
+        input_validator.setRegExp(regexp_query)
+
+        self.scalar.setValidator(input_validator)       # скаляр
+
+        # Нажатие на кнопку 'Выполнить операцию'
+        self.pushButton_2.clicked.connect(self.inv_s)
+
+    # Обработка нажатия на кнопку 'Выполнить операцию'
+    def inv_s(self):    
+        global result
+
+        scalar_a = float(self.scalar.text())
+
+        result = Scalar(scalar_a).tg
+    
+        # Вывод результата в отдельное окно
+        output_result_trace()
+
+class Ctg_S(one_scalar.Ui_Dialog, QDialog):
+    # Котангенс
+
+    def __init__(self):
+        QDialog.__init__(self)
+        self.setupUi(self)
+
+        regexp_query = QRegExp('[0-9]*')
+        input_validator = QRegExpValidator(regexp_query)
+        input_validator.setRegExp(regexp_query)
+
+        self.scalar.setValidator(input_validator)       # скаляр
+
+        # Нажатие на кнопку 'Выполнить операцию'
+        self.pushButton_2.clicked.connect(self.inv_s)
+
+    # Обработка нажатия на кнопку 'Выполнить операцию'
+    def inv_s(self):    
+        global result
+
+        scalar_a = float(self.scalar.text())
+
+        result = Scalar(scalar_a).ctg
+    
+        # Вывод результата в отдельное окно
+        output_result_trace()
 #
 # Операции со скалярами
 #----------------------------------------------------------
 
+
 #----------------------------------------------------------
-#
-#           Основные окна
-#
-#----------------------------------------------------------
+# Основные окна
+# 
 class MainApp_M(main.Ui_Dialog, QDialog):
     def __init__(self):
         QDialog.__init__(self)
@@ -1284,7 +1170,6 @@ class MainApp_M(main.Ui_Dialog, QDialog):
     def save_index(self, index):
         global current_index
         current_index = index
-        print(current_index)
 
     # Обработка нажатия на кнопку "Выбрать данную операцию"
     def enter(self):
@@ -1346,10 +1231,7 @@ class MainApp_V(main.Ui_Dialog, QDialog):
         # Добавление значений для выбора операций
         self.comboBox.addItems(['Умножение вектора на скаляр',
             'Поэлементное сложение', 'Поэлементное произведение',
-            'Умножение вектора на матрицу', 'Скалярное произведение',
-            'Векторное произведение', 'Вычисление длины вектора',
-            'Проверка сонаправленности векторов', 
-            'Проверка векторов на ортогональность'])
+            'Умножение вектора на матрицу', 'Вычисление длины вектора',])
 
         self.comboBox.highlighted[int].connect(self.save_index)
 
@@ -1359,7 +1241,6 @@ class MainApp_V(main.Ui_Dialog, QDialog):
     def save_index(self, index):
         global current_index
         current_index = index
-        print(current_index)
 
     # Обработка нажатия на кнопку "Выбрать данную операцию"
     def enter(self):
@@ -1385,31 +1266,11 @@ class MainApp_V(main.Ui_Dialog, QDialog):
             win.show()
             win.exec_()
 
-        elif current_index == 4:    #
-            win = Mul_V_scalar()
-            win.show()
-            win.exec_()
-
-        elif current_index == 5:    #
-            win = Trace_M()
-            win.show()
-            win.exec_()
-
-        elif current_index == 6:
+        elif current_index == 4:
             win = V_len()
             win.show()
             win.exec_()
 
-        elif current_index == 7:    #
-            win = Reverse_M()
-            win.show()
-            win.exec_()
-
-        elif current_index == 8:    #
-            win = Transp_M()
-            win.show()
-            win.exec_()
-            
         else:
             exit()
 
@@ -1433,7 +1294,6 @@ class MainApp_S(main.Ui_Dialog, QDialog):
     def save_index(self, index):
         global current_index
         current_index = index
-        print(current_index)
 
     # Обработка нажатия на кнопку "Выбрать данную операцию"
     def enter(self):
@@ -1465,22 +1325,22 @@ class MainApp_S(main.Ui_Dialog, QDialog):
             win.exec_()
 
         elif current_index == 5:
-            win = Trace_M()
+            win = Sin_S()
             win.show()
             win.exec_()
 
         elif current_index == 6:
-            win = Det_M()
+            win = Cos_S()
             win.show()
             win.exec_()
 
         elif current_index == 7:
-            win = Reverse_M()
+            win = Tg_S()
             win.show()
             win.exec_()
 
         elif current_index == 8:
-            win = Transp_M()
+            win = Ctg_S()
             win.show()
             win.exec_()
             
@@ -1501,7 +1361,6 @@ class Select(select.Ui_MainWindow, QMainWindow):
     def save_index(self, index):
         global current_index
         current_index = index
-        print(current_index)
         
     def enter(self):
         global current_index
@@ -1523,6 +1382,9 @@ class Select(select.Ui_MainWindow, QMainWindow):
             
         else:
             exit()
+# 
+# Основные окна
+#----------------------------------------------------------
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'M_0.ui'
+# Form implementation generated from reading ui file 'M_3.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -32,23 +32,11 @@ class Ui_Dialog(object):
         self.tableWidget_A.setObjectName("tableWidget_A")
         self.tableWidget_A.setColumnCount(0)
         self.tableWidget_A.setRowCount(0)
-        self.title_A_2 = QtWidgets.QLabel(Dialog)
-        self.title_A_2.setGeometry(QtCore.QRect(10, 350, 151, 20))
-        font = QtGui.QFont()
-        font.setFamily("MS Shell Dlg 2")
-        font.setPointSize(11)
-        font.setBold(True)
-        font.setWeight(75)
-        self.title_A_2.setFont(font)
-        self.title_A_2.setObjectName("title_A_2")
-        self.scalar = QtWidgets.QLineEdit(Dialog)
-        self.scalar.setGeometry(QtCore.QRect(170, 350, 121, 20))
-        self.scalar.setObjectName("scalar")
         self.columns_A = QtWidgets.QLineEdit(Dialog)
-        self.columns_A.setGeometry(QtCore.QRect(160, 40, 121, 20))
+        self.columns_A.setGeometry(QtCore.QRect(180, 40, 121, 20))
         self.columns_A.setObjectName("columns_A")
         self.title_A_3 = QtWidgets.QLabel(Dialog)
-        self.title_A_3.setGeometry(QtCore.QRect(10, 10, 271, 20))
+        self.title_A_3.setGeometry(QtCore.QRect(30, 10, 271, 20))
         font = QtGui.QFont()
         font.setFamily("MS Shell Dlg 2")
         font.setPointSize(11)
@@ -57,7 +45,7 @@ class Ui_Dialog(object):
         self.title_A_3.setFont(font)
         self.title_A_3.setObjectName("title_A_3")
         self.title_A_4 = QtWidgets.QLabel(Dialog)
-        self.title_A_4.setGeometry(QtCore.QRect(10, 40, 141, 20))
+        self.title_A_4.setGeometry(QtCore.QRect(30, 40, 141, 20))
         font = QtGui.QFont()
         font.setFamily("MS Shell Dlg 2")
         font.setPointSize(11)
@@ -66,7 +54,7 @@ class Ui_Dialog(object):
         self.title_A_4.setFont(font)
         self.title_A_4.setObjectName("title_A_4")
         self.title_A_5 = QtWidgets.QLabel(Dialog)
-        self.title_A_5.setGeometry(QtCore.QRect(10, 60, 111, 20))
+        self.title_A_5.setGeometry(QtCore.QRect(30, 60, 111, 20))
         font = QtGui.QFont()
         font.setFamily("MS Shell Dlg 2")
         font.setPointSize(11)
@@ -75,13 +63,13 @@ class Ui_Dialog(object):
         self.title_A_5.setFont(font)
         self.title_A_5.setObjectName("title_A_5")
         self.lines_A = QtWidgets.QLineEdit(Dialog)
-        self.lines_A.setGeometry(QtCore.QRect(160, 60, 121, 20))
+        self.lines_A.setGeometry(QtCore.QRect(180, 60, 121, 20))
         self.lines_A.setObjectName("lines_A")
         self.pushButton = QtWidgets.QPushButton(Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(310, 40, 131, 41))
+        self.pushButton.setGeometry(QtCore.QRect(330, 40, 131, 41))
         self.pushButton.setObjectName("pushButton")
         self.pushButton_2 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_2.setGeometry(QtCore.QRect(310, 340, 131, 41))
+        self.pushButton_2.setGeometry(QtCore.QRect(180, 340, 131, 41))
         self.pushButton_2.setObjectName("pushButton_2")
 
         self.retranslateUi(Dialog)
@@ -91,7 +79,6 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Ввод значений"))
         self.title_A.setText(_translate("Dialog", "Заполните матрицу A:"))
-        self.title_A_2.setText(_translate("Dialog", "Введите скаляр b:"))
         self.title_A_3.setText(_translate("Dialog", "Введите размерность матрицы A:"))
         self.title_A_4.setText(_translate("Dialog", "Кол-во столбцов:"))
         self.title_A_5.setText(_translate("Dialog", "Кол-во строк:"))

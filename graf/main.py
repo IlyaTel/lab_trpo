@@ -11,19 +11,28 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.setEnabled(True)
-        MainWindow.resize(400, 300)
-        MainWindow.setMinimumSize(QtCore.QSize(400, 300))
-        MainWindow.setMaximumSize(QtCore.QSize(400, 300))
-        MainWindow.setStyleSheet("background-color: rgb(230, 230, 230);")
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.generate_and_calculate = QtWidgets.QPushButton(self.centralwidget)
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(400, 300)
+        Dialog.setMinimumSize(QtCore.QSize(400, 300))
+        Dialog.setMaximumSize(QtCore.QSize(400, 300))
+        Dialog.setStyleSheet("background-color: rgb(230, 230, 230);")
+        self.comboBox = QtWidgets.QComboBox(Dialog)
+        self.comboBox.setGeometry(QtCore.QRect(80, 70, 241, 22))
+        self.comboBox.setObjectName("comboBox")
+        self.title_A_2 = QtWidgets.QLabel(Dialog)
+        self.title_A_2.setGeometry(QtCore.QRect(50, 30, 311, 20))
+        font = QtGui.QFont()
+        font.setFamily("MS Shell Dlg 2")
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.title_A_2.setFont(font)
+        self.title_A_2.setObjectName("title_A_2")
+        self.generate_and_calculate = QtWidgets.QPushButton(Dialog)
         self.generate_and_calculate.setEnabled(True)
-        self.generate_and_calculate.setGeometry(QtCore.QRect(120, 100, 120, 80))
+        self.generate_and_calculate.setGeometry(QtCore.QRect(140, 150, 120, 80))
         self.generate_and_calculate.setMinimumSize(QtCore.QSize(120, 80))
         self.generate_and_calculate.setMaximumSize(QtCore.QSize(120, 80))
         font = QtGui.QFont()
@@ -37,25 +46,12 @@ class Ui_MainWindow(object):
         self.generate_and_calculate.setStyleSheet("background-color: #00dd00;\n"
 "color: #000000;")
         self.generate_and_calculate.setObjectName("generate_and_calculate")
-        self.title_A = QtWidgets.QLabel(self.centralwidget)
-        self.title_A.setGeometry(QtCore.QRect(50, 30, 311, 20))
-        font = QtGui.QFont()
-        font.setFamily("MS Shell Dlg 2")
-        font.setPointSize(11)
-        font.setBold(True)
-        font.setWeight(75)
-        self.title_A.setFont(font)
-        self.title_A.setObjectName("title_A")
-        self.comboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.comboBox.setGeometry(QtCore.QRect(30, 60, 341, 22))
-        self.comboBox.setObjectName("comboBox")
-        MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Произведение Матриц"))
-        self.generate_and_calculate.setText(_translate("MainWindow", "ОК"))
-        self.title_A.setText(_translate("MainWindow", "Выберите одну из доступных операций"))
+        Dialog.setWindowTitle(_translate("Dialog", "Выбор операции"))
+        self.title_A_2.setText(_translate("Dialog", "Выберите одну из доступных операций:"))
+        self.generate_and_calculate.setText(_translate("Dialog", "ОК"))

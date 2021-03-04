@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'result_matrix.ui'
+# Form implementation generated from reading ui file 'result_trace.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -14,12 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(400, 300)
-        Dialog.setMinimumSize(QtCore.QSize(400, 300))
-        Dialog.setMaximumSize(QtCore.QSize(400, 300))
+        Dialog.resize(200, 150)
+        Dialog.setMinimumSize(QtCore.QSize(200, 150))
+        Dialog.setMaximumSize(QtCore.QSize(200, 150))
         Dialog.setStyleSheet("background-color: rgb(230, 230, 230);")
         self.title_A = QtWidgets.QLabel(Dialog)
-        self.title_A.setGeometry(QtCore.QRect(110, 20, 171, 20))
+        self.title_A.setGeometry(QtCore.QRect(20, 10, 171, 20))
         font = QtGui.QFont()
         font.setFamily("MS Shell Dlg 2")
         font.setPointSize(11)
@@ -28,7 +28,7 @@ class Ui_Dialog(object):
         self.title_A.setFont(font)
         self.title_A.setObjectName("title_A")
         self.tableWidget = QtWidgets.QTableWidget(Dialog)
-        self.tableWidget.setGeometry(QtCore.QRect(60, 50, 271, 201))
+        self.tableWidget.setGeometry(QtCore.QRect(30, 50, 141, 81))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)

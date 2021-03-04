@@ -420,7 +420,8 @@ class Mul_M_on_V(M_2.Ui_Dialog, QDialog):
         self.pushButton.clicked.connect(self.size_matrix)
 
         # Нажатие на кнопку 'Выполнить операцию'
-        self.pushButton_2.clicked.connect(self.mul_matrix_on_vector)
+        self.pushButton_2.clicked.connect(
+            self.mul_matrix_on_vector)
 
     # Обработка нажатия на кнопку 'Заполнить матрицу'
     def size_matrix(self):

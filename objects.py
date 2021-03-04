@@ -104,48 +104,6 @@ class Vector:
                     )
                 )
 
-    def scalar_mul(self, other) -> int64:
-        # Скалярное умножение векторов
-        
-        return dot(self.__data, other.numpy_repr)
-
-    def vec_mul(self, other):
-        # Векторное произведение трехмерный векторов
-
-        if not isinstance(other, Vector):
-            raise TypeError('Второй аргумент не является вектором')
-        else:
-            if self.len < 3 or other.len < 3:
-                raise ValueError('Вектор не является трехмерным')
-            else:
-                return Vector(cross(self.__data, other.numpy_repr))
-
-    def is_collen(self, second_vector) -> bool:
-
-        if not isinstance(second_vector, Vector):
-            raise TypeError('Второй аргумент не является вектором')
-        else:
-            if second_vector.len != self.len:
-                raise ValueError('Длины векторов не равны')
-            else:
-                second_vector = second_vector.numpy_repr
-
-            results = []
-
-            for i, j in zip(self.__data, second_vector):
-                results.append(i / j)
-
-            if len(set(results)) == 1:
-                return True
-
-            return False
-
-    def is_ortog(self, second_vector) -> bool:
-
-        if self.scalar_mul(second_vector) == 0:
-            return True
-
-        return False
 
 class Scalar:
     def __init__(self, data) -> None:
